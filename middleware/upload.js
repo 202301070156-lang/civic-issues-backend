@@ -1,33 +1,66 @@
 const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
 
-// 📦 Storage configuration
+// ================= CREATE UPLOADS FOLDER =================
+const uploadPath = 'uploads/';
+
+if (!fs.existsSync(uploadPath)) {
+    fs.mkdirSync(uploadPath);
+}
+
+// ================= STORAGE =================
 const storage = multer.diskStorage({
+
     destination: (req, file, cb) => {
-        cb(null, 'uploads/');   // folder where images will be stored
+
+        cb(null, uploadPath);
     },
+
     filename: (req, file, cb) => {
-        const uniqueName = Date.now() + '-' + file.originalname;
+
+        const uniqueName =
+            Date.now() +
+            '-' +
+            file.originalname.replace(/\s+/g, '_');
+
         cb(null, uniqueName);
     }
 });
 
-// 🚫 File filter (optional but recommended)
+// ================= FILE FILTER =================
 const fileFilter = (req, file, cb) => {
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+
+    const allowedTypes = [
+        'image/jpeg',
+        'image/jpg',
+        'image/png'
+    ];
 
     if (allowedTypes.includes(file.mimetype)) {
+
         cb(null, true);
+
     } else {
-        cb(new Error('Only JPG, JPEG, PNG files allowed'), false);
+
+        cb(
+            new Error(
+                'Only JPG JPEG PNG allowed'
+            ),
+            false
+        );
     }
 };
 
-// ⚙️ Upload setup
+// ================= MULTER =================
 const upload = multer({
+
     storage,
+
     fileFilter,
+
     limits: {
-        fileSize: 5 * 1024 * 1024   // 5MB limit
+        fileSize: 5 * 1024 * 1024
     }
 });
 
